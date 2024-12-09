@@ -1,7 +1,5 @@
 import os
 import subprocess
-import requests
-from urllib.parse import urljoin
 
 # Color codes for pretty output
 class Colors:
@@ -26,13 +24,21 @@ def nmap_scan(target):
     except Exception as e:
         print(f"{Colors.FAIL}[-] Error running Nmap: {e}{Colors.ENDC}")
 
-# Gobuster Directory Brute-Force
-def gobuster_scan(target, wordlist):
-    print(f"{Colors.HEADER}Running Gobuster on: {target}{Colors.ENDC}")
+# FFUF Directory Brute-Force
+def ffuf_scan(target, wordlist):
+    print(f"{Colors.HEADER}Running FFUF on: {target}{Colors.ENDC}")
     try:
-        subprocess.run(["gobuster", "dir", "-u", target, "-w", wordlist], check=True)
+        subprocess.run(["ffuf", "-u", f"{target}/FUZZ", "-w", wordlist], check=True)
     except Exception as e:
-        print(f"{Colors.FAIL}[-] Error running Gobuster: {e}{Colors.ENDC}")
+        print(f"{Colors.FAIL}[-] Error running FFUF: {e}{Colors.ENDC}")
+
+# Dirb Directory Brute-Force
+def dirb_scan(target, wordlist):
+    print(f"{Colors.HEADER}Running Dirb on: {target}{Colors.ENDC}")
+    try:
+        subprocess.run(["dirb", target, wordlist], check=True)
+    except Exception as e:
+        print(f"{Colors.FAIL}[-] Error running Dirb: {e}{Colors.ENDC}")
 
 # Nikto Web Vulnerability Scanner
 def nikto_scan(target):
@@ -63,11 +69,12 @@ def steghide_extract(filename):
 def main():
     banner()
     print("1. Nmap Port Scan")
-    print("2. Gobuster Directory Brute-Force")
-    print("3. Nikto Web Vulnerability Scan")
-    print("4. Strings Extraction (File Analysis)")
-    print("5. Steghide (Steganography)")
-    print("6. Exit")
+    print("2. FFUF Directory Brute-Force")
+    print("3. Dirb Directory Brute-Force")
+    print("4. Nikto Web Vulnerability Scan")
+    print("5. Strings Extraction (File Analysis)")
+    print("6. Steghide (Steganography)")
+    print("7. Exit")
     choice = input(f"{Colors.WARNING}Choose an option: {Colors.ENDC}")
 
     if choice == "1":
@@ -76,17 +83,21 @@ def main():
     elif choice == "2":
         target = input("Enter target URL (e.g., http://example.com): ")
         wordlist = input("Enter path to wordlist: ")
-        gobuster_scan(target, wordlist)
+        ffuf_scan(target, wordlist)
     elif choice == "3":
+        target = input("Enter target URL (e.g., http://example.com): ")
+        wordlist = input("Enter path to wordlist: ")
+        dirb_scan(target, wordlist)
+    elif choice == "4":
         target = input("Enter target URL or IP: ")
         nikto_scan(target)
-    elif choice == "4":
+    elif choice == "5":
         filename = input("Enter path to the file: ")
         extract_strings(filename)
-    elif choice == "5":
+    elif choice == "6":
         filename = input("Enter path to the file (image/audio): ")
         steghide_extract(filename)
-    elif choice == "6":
+    elif choice == "7":
         print(f"{Colors.OKBLUE}Exiting...{Colors.ENDC}")
     else:
         print(f"{Colors.FAIL}Invalid option!{Colors.ENDC}")
